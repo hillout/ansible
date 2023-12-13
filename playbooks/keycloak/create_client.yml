@@ -35,11 +35,11 @@
 
     # - name: Create a new client
     #   community.general.keycloak_client:
-    #     auth_keycloak_url: https://tc-keycloak0.telecontact.ru
+    #     auth_keycloak_url: https://domain.org
     #     auth_realm: SSO-test
     #     auth_client_id: admin-cli
     #     auth_username: admin
-    #     auth_password: Cdewsxzaq2002
+    #     auth_password: password
     #     state: present
     #     realm: SSO-test
     #     client_id: test-new
