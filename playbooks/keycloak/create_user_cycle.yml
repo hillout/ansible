@@ -1,0 +1,35 @@
+---
+- name: Создание пользователей в Keycloak
+  hosts: localhost
+  connection: local 
+  
+  tasks:
+    - name: Создание пользователей
+      community.general.keycloak_user:
+        auth_keycloak_url: https://domain.org
+        auth_username: admin
+        auth_password: password
+        auth_realm: SSO-test
+        realm: SSO-test
+        username: "{{ item.username }}"
+        firstName: "{{ item.firstName }}"
+        lastName: "{{ item.lastName }}"
+        email: "{{ item.email }}"
+        enabled: true
+        emailVerified: true
+        credentials:
+          - type: password
+            value: password
+            temporary: true
+        attributes:
+          - name: personal_id
+            values:
+              - "{{ item.personal_id }}"
+            state: present
+        state: present
+      loop:
+        - { username: 'kc_user1', firstName: 'User1', lastName: 'Userovich1', email: 'kc_user1@telecontact.ru', personal_id: '1234567891' }
+        - { username: 'kc_user2', firstName: 'User2', lastName: 'Userovich2', email: 'kc_user2@telecontact.ru', personal_id: '1234567892' }
+        - { username: 'kc_user3', firstName: 'User3', lastName: 'Userovich3', email: 'kc_user3@telecontact.ru', personal_id: '1234567893' }
+        - { username: 'kc_user4', firstName: 'User4', lastName: 'Userovich4', email: 'kc_user4@telecontact.ru', personal_id: '1234567894' }
+        - { username: 'kc_user5', firstName: 'User5', lastName: 'Userovich5', email: 'kc_user5@telecontact.ru', personal_id: '1234567895' }
