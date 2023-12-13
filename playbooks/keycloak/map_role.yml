@@ -1,0 +1,19 @@
+---
+- hosts: localhost
+  connection: local 
+  
+  tasks:
+    - name: Map a client role to a user, authentication with credentials
+      community.general.keycloak_user_rolemapping:
+        realm: SSO-test
+        auth_keycloak_url: https://domain.org
+        auth_realm: SSO-test
+        auth_username: admin
+        auth_password: password
+        client_id: client1
+        target_username: "user1"
+        roles:
+          - name: ProjectManagement
+            # id: 91c89d12-e2e4-42b0-ba2e-4e1f9850c007
+        state: present            
+        #state: absent 
