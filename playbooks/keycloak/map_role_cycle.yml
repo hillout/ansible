@@ -1,0 +1,24 @@
+---
+- hosts: localhost
+  connection: local 
+  
+  tasks:
+    - name: Map a client role to a user, authentication with credentials
+      community.general.keycloak_user_rolemapping:
+        realm: SSO-test
+        auth_keycloak_url: https://domain.org
+        auth_realm: SSO-test
+        auth_username: admin
+        auth_password: password
+        client_id: client1
+        target_username: "{{ item }}"
+        roles:
+          - name: ProjectManagement
+        state: present
+
+      loop:
+          - kc_user1
+          - kc_user2
+          - kc_user3
+          - kc_user4
+          - kc_user5
