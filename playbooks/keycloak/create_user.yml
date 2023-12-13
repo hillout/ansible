@@ -1,0 +1,30 @@
+---
+- hosts: localhost
+  connection: local 
+  
+  tasks:
+    - name: Create a user user1
+      community.general.keycloak_user:
+        auth_keycloak_url: https://domain.org
+        auth_username: admin
+        auth_password: password
+        auth_realm: SSO-test
+        realm: SSO-test
+        
+        username: kc_user3
+        firstName: User3
+        lastName: Userovich3
+        email: kc_user3@telecontact.ru
+        enabled: true
+        emailVerified: true
+        credentials:
+            - type: password
+              value: password
+              temporary: true
+        attributes:
+            - name: personal_id
+              values:
+                - 123456789
+              state: present
+        state: present
+        
