@@ -1,0 +1,118 @@
+---
+- name: Install Docker on Ubuntu
+  hosts: germany2.vpn
+  # hosts: '{{ hosts.split() }}'
+  # vars_prompt:
+  #   - name: "hosts"
+  #     prompt: "Введите список хостов, разделенных пробелами:"
+  #     default: 'test1.vpn test2.vpn'
+  #     private: false
+  remote_user: tima
+  
+  become: true
+  vars:
+    # Map ansible architecture {{ ansible_architecture }} names to Docker's architecture names
+    arch_mapping:
+      x86_64: amd64
+      aarch64: arm64
+    ssh_port: "{{ ssh_port | default(22) }}"
+  # vars_prompt:
+  #   - name: "ssh_port"
+  #     prompt: "Введите номер порта ssh:"
+  #     default: '22'
+
+  tasks:
+    - name: Обновляю пакеты
+      apt:
+        update_cache: yes
+        upgrade: dist
+
+    - name: Устанавливаю необходимые пакеты перед установкой Docker'а
+      apt:
+        state: present      
+        name:
+          - net-tools
+          - traceroute
+          - dnsutils
+          - ufw
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg
+          - software-properties-common
+      
+
+    - name: Создаю директорию для Docker GPG ключа
+      file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: '0755'
+
+
+    - name: Добавляю офф. Docker GPG ключ
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        keyring: /etc/apt/keyrings/docker.gpg
+        state: present
+
+
+    - name: Вывожу архитектуру системы
+      debug:
+        msg: "Architecture: {{ ansible_architecture }}, Codename: {{ ansible_lsb.codename }}"
+
+
+    - name: Добавляю Docker репозиторий
+      apt_repository:
+        repo: "deb [arch={{ arch_mapping[ansible_architecture] | default(ansible_architecture) }} signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu {{ ansible_lsb.codename }} stable"
+        filename: docker
+        state: present
+
+
+    - name: Устанавливаю пакеты Docker
+      apt:
+        state: present      
+        name:
+        - docker-ce
+        - docker-ce-cli
+        - containerd.io
+        - docker-buildx-plugin
+        - docker-compose-plugin
+
+
+    - name: Создаю группу Docker
+      group:
+        name: docker
+        state: present
+
+
+    - name: Добавляю пользователя to Docker группу
+      user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: yes
+
+
+    - name: Активирую и запускаю сервис Docker
+      systemd:
+        name: "{{ item }}"
+        enabled: yes
+        state: started
+      loop:
+        - docker.service
+        - containerd.service
+
+
+    - name: Активируем UFW
+      community.general.ufw:
+        state: enabled
+
+    - name: Открытие портов в фаерволе
+      ufw:
+        state: enabled
+        rule: allow
+        port: "{{ item }}"
+      with_items:
+        - 80
+        - 443
+        - 62071  # Порт SSH после изменения
+      # notify: restart ufw
