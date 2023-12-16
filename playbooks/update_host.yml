@@ -1,0 +1,10 @@
+---
+- name: Install Docker on Ubuntu
+  hosts: all
+  remote_user: tima
+  become: true
+  tasks:
+    - name: Обновляю и произвожу апгрейд пакетов
+      apt:
+        update_cache: yes
+        upgrade: dist
